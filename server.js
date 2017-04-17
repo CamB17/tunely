@@ -5,43 +5,22 @@ var express = require('express');
 // generate a new express app and call it 'app'
 var app = express();
 
+//require mongoose
+var mongoose = require('mongoose');
+var bodyParser = require('body-parser');
+
+
+
 // serve static files from public folder
 app.use(express.static(__dirname + '/public'));
-
+app.use(bodyParser.urlencoded({ extended: true }));
 /************
  * DATABASE *
  ************/
 
-/* hard-coded data */
-var albums = [];
-albums.push({
-              _id: 132,
-              artistName: 'the Old Kanye',
-              name: 'The College Dropout',
-              releaseDate: '2004, February 10',
-              genres: [ 'rap', 'hip hop' ]
-            });
-albums.push({
-              _id: 133,
-              artistName: 'the New Kanye',
-              name: 'The Life of Pablo',
-              releaseDate: '2016, Febraury 14',
-              genres: [ 'hip hop' ]
-            });
-albums.push({
-              _id: 134,
-              artistName: 'the always rude Kanye',
-              name: 'My Beautiful Dark Twisted Fantasy',
-              releaseDate: '2010, November 22',
-              genres: [ 'rap', 'hip hop' ]
-            });
-albums.push({
-              _id: 135,
-              artistName: 'the sweet Kanye',
-              name: '808s & Heartbreak',
-              releaseDate: '2008, November 24',
-              genres: [ 'r&b', 'electropop', 'synthpop' ]
-            });
+//require ./models db
+var db = require('./models');
+
 
 
 
@@ -73,9 +52,25 @@ app.get('/api', function api_index (req, res){
   });
 });
 
+//Sprint 1 step 2
 app.get('/api/albums', function album_index(req, res){
+    //access db to pull all{} albums
+    db.Album.find({}, function(err, albums) {
+      res.json(albums);
+    });
+});
 
-})
+//Sprint 2 step 3 POST route
+app.post('/api/albums', function album_index(req,res) {
+    console.log('body', req.body);
+
+    db.Album.create(req.body, function(err, album) {
+      if(err) { console.log('error', err); 
+      console.log(album);
+      res.json(album);}
+    });
+});
+
 
 /**********
  * SERVER *
