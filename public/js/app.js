@@ -17,22 +17,80 @@ $.post('/api/albums', formData, function(album) {
     console.log('album after POST', album);
 //render server's response
     renderAlbum(album);
-});
-  $(this).trigger("reset");
   });
+  $(this).trigger("reset");
+});
+
+//
+$('#albums').on('click', '.add-song', function(e) {
+    var id = $(this).parents('.album').data('album-id');
+    console.log("This is equal to " + this);
+    console.log('id',id);
+    $('#songModal').data('album-id', id);
+    $('#songModal').modal();
+});
+//save new song on click
+$('#saveSong').on('click', handleNewSongSubmit);
+
 });
 
 
+//POST form to server
+function handleNewsdongSubmit(e) {
+  var albumId = $('#songModal').data('album-id');
+  console.log(albumId);
+  var songName = $('#songName').val();
+  console.log(songName);
+  var trackNumber = $('#trackNumber').val();
+  console.log(trackNumber);
 
+  var formData = {
+    name: songName,
+    trackNumber: trackNumber
+  };
 
+var postUrl = '/api/albums/' + albumId + '/songs';
+  console.log('posting to ', postUrl, ' with data ', formData);
+
+  $.post(postUrl, formData)
+    .success(function(song) {
+      console.log(song);
+
+      $.get('/api/albums/' + albumId).success(function(album) {
+        $('[data-album-id='+ albumId + ']').remove();
+        renderAlbum(album);
+      });
+
+      //clear form
+      $('#songName').val('');
+      $('#trackNumber').val('');
+      $('#songModal').modal('hide');
+
+    });
+}
+
+//buildSongsHtml function
+function buildSongsHtml(songs) {
+  var songText = "    &ndash; ";
+  songs.forEach(function(song) {
+    songText = songText + "(" + song.trackNumber + ") " + song.name + " &ndash; ";
+  });
+  var songsHtml  =
+   "                      <li class='list-group-item'>" +
+   "                        <h4 class='inline-header'>Songs:</h4>" +
+   "                         <span>" + songText + "</span>" +
+   "                      </li>";
+  return songsHtml;
+}
 
 // this function takes a single album and renders it to the page
 function renderAlbum(album) {
   console.log('rendering album:', album);
 
+
   var albumHtml =
   "        <!-- one album -->" +
-  "        <div class='row album' data-album-id='" + "HARDCODED ALBUM ID" + "'>" +
+  "        <div class='row album' data-album-id='" + album._id + "'>" +
   "          <div class='col-md-10 col-md-offset-1'>" +
   "            <div class='panel panel-default'>" +
   "              <div class='panel-body'>" +
@@ -55,7 +113,9 @@ function renderAlbum(album) {
   "                        <h4 class='inline-header'>Released date:</h4>" +
   "                        <span class='album-releaseDate'>" + album.releaseDate + "</span>" +
   "                      </li>" +
-  "                    </ul>" +
+  //call buildSongs and pass in songs array
+  buildSongsHtml(album.songs) +                    
+  "                   </ul>" +
   "                  </div>" +
   "                </div>" +
   "                <!-- end of album internal row -->" +
