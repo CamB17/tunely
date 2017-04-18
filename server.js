@@ -4,7 +4,6 @@
 var express = require('express');
 // generate a new express app and call it 'app'
 var app = express();
-
 //require mongoose
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
@@ -20,8 +19,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 //require ./models db
 var db = require('./models');
-
-
 
 
 /**********
@@ -63,13 +60,15 @@ app.get('/api/albums', function album_index(req, res){
 //Sprint 2 step 3 POST route
 app.post('/api/albums', function album_index(req,res) {
     console.log('body', req.body);
+
+
 var genres = req.body.genres.split(',').map(function(item) { return item.trim(); } );
   req.body.genres = genres;
     
     db.Album.create(req.body, function(err, album) {
-      if(err) { console.log('error', err); 
+      if(err) { console.log('error', err); }
       console.log(album);
-      res.json(album);}
+      res.json(album);
     });
 });
 
@@ -89,7 +88,7 @@ app.post('/api/albums/:albumId/songs', function songsCreate(req, res) {
     var song = new db.Song(req.body);
     album.songs.push(song);
     album.save(function(err, savedAlbum) {
-      if (err) { console.log(err); }
+      if (err) { console.log('error', err); }
       console.log('new song saved on:', savedAlbum);
       res.json(song);
     });

@@ -1,41 +1,81 @@
-/* CLIENT-SIDE JS*/
+/* CLIENT-SIDE JS
+ *
+ * You may edit this file as you see fit.  Try to separate different components
+ * into functions and objects as needed.
+ *
+ */
 
+
+/* hard-coded data! */
+var sampleAlbums = [];
+sampleAlbums.push({
+             artistName: 'Ladyhawke',
+             name: 'Ladyhawke',
+             releaseDate: '2008, November 18',
+             genres: [ 'new wave', 'indie rock', 'synth pop' ]
+           });
+sampleAlbums.push({
+             artistName: 'The Knife',
+             name: 'Silent Shout',
+             releaseDate: '2006, February 17',
+             genres: [ 'synth pop', 'electronica', 'experimental' ]
+           });
+sampleAlbums.push({
+             artistName: 'Juno Reactor',
+             name: 'Shango',
+             releaseDate: '2000, October 9',
+             genres: [ 'electronic', 'goa trance', 'tribal house' ]
+           });
+sampleAlbums.push({
+             artistName: 'Philip Wesley',
+             name: 'Dark Night of the Soul',
+             releaseDate: '2008, September 12',
+             genres: [ 'piano' ]
+           });
+/* end of hard-coded data */
+
+
+
+// wait until document is ready and then get albums
 $(document).ready(function() {
   console.log('app.js loaded!');
-/*connect to new GET route for albums*/
-$.get('./api/albums', function(albums) {
+  $.get('/api/albums').success(function (albums) {
     albums.forEach(function(album) {
       renderAlbum(album);
+    });
   });
-});
 
-$('#album-form form').on('submit', function(e) {
+
+// when form submits, serialize form data and post it to api
+  $('#album-form form').on('submit', function(e) {
     e.preventDefault();
     var formData = $(this).serialize();
-      console.log('formData', formData);
-$.post('/api/albums', formData, function(album) {
-    console.log('album after POST', album);
-//render server's response
-    renderAlbum(album);
-  });
-  $(this).trigger("reset");
-});
+    console.log('formData', formData);
+    $.post('/api/albums', formData, function(album) {
+      console.log('album after POST request is ', album);
 
-//
-$('#albums').on('click', '.add-song', function(e) {
-    var id = $(this).parents('.album').data('album-id');
+      //render the response from the server
+      renderAlbum(album);  
+    });
+    $(this).trigger("reset");
+  });
+
+
+  $('#albums').on('click', '.add-song', function(e) {
+    var id= $(this).parents('.album').data('album-id');
     console.log("This is equal to " + this);
     console.log('id',id);
     $('#songModal').data('album-id', id);
     $('#songModal').modal();
-});
-//save new song on click
-$('#saveSong').on('click', handleNewSongSubmit);
+  });
+
+  $('#saveSong').on('click', handleNewSongSubmit);
 
 });
 
-//POST form to server
-function handleNewsdongSubmit(e) {
+
+// handles the modal fields and POSTing the form to the server
+function handleNewSongSubmit(e) {
   var albumId = $('#songModal').data('album-id');
   console.log(albumId);
   var songName = $('#songName').val();
@@ -48,7 +88,7 @@ function handleNewsdongSubmit(e) {
     trackNumber: trackNumber
   };
 
-var postUrl = '/api/albums/' + albumId + '/songs';
+  var postUrl = '/api/albums/' + albumId + '/songs';
   console.log('posting to ', postUrl, ' with data ', formData);
 
   $.post(postUrl, formData)
@@ -68,8 +108,11 @@ var postUrl = '/api/albums/' + albumId + '/songs';
     });
 }
 
-//buildSongsHtml function
+
+
 function buildSongsHtml(songs) {
+
+  // make a long dash
   var songText = "    &ndash; ";
   songs.forEach(function(song) {
     songText = songText + "(" + song.trackNumber + ") " + song.name + " &ndash; ";
@@ -82,10 +125,11 @@ function buildSongsHtml(songs) {
   return songsHtml;
 }
 
-// this function takes a single album and renders it to the page
+
+
+// this function renders one album to page
 function renderAlbum(album) {
   console.log('rendering album:', album);
-
 
   var albumHtml =
   "        <!-- one album -->" +
@@ -106,15 +150,15 @@ function renderAlbum(album) {
   "                      </li>" +
   "                      <li class='list-group-item'>" +
   "                        <h4 class='inline-header'>Artist Name:</h4>" +
-  "                        <span class='artist-name'>" +  album.artistName + "</span>" +
+  "                        <span class='artist-name'>" + album.artistName + "</span>" +
   "                      </li>" +
   "                      <li class='list-group-item'>" +
   "                        <h4 class='inline-header'>Released date:</h4>" +
-  "                        <span class='album-releaseDate'>" + album.releaseDate + "</span>" +
+  "                        <span class='album-name'>" + album.releaseDate + "</span>" +
   "                      </li>" +
-  //call buildSongs and pass in songs array
-  buildSongsHtml(album.songs) +                    
-  "                   </ul>" +
+//adds songs as fourth li element in loop
+  buildSongsHtml(album.songs) +
+  "                    </ul>" +
   "                  </div>" +
   "                </div>" +
   "                <!-- end of album internal row -->" +
@@ -122,21 +166,12 @@ function renderAlbum(album) {
   "              </div>" + // end of panel-body
 
   "              <div class='panel-footer'>" +
+  "                <button class='btn btn-primary add-song'>Add Song</button>" +
   "              </div>" +
 
   "            </div>" +
   "          </div>" +
   "          <!-- end one album -->";
 
-      // render to the page with jQuery
-       $('#albums').append(albumHtml);
-       //serialize form
-    var formdata = $(this).serialize();
-       $("form").on("submit", function(event) {
-        event.preventDefault();
-       console.log( $(this).serialize() );
-        $(this).trigger("reset");
-    });     
-
-
-  }
+  $('#albums').prepend(albumHtml);
+ }
