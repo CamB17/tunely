@@ -34,7 +34,6 @@ $('#saveSong').on('click', handleNewSongSubmit);
 
 });
 
-
 //POST form to server
 function handleNewsdongSubmit(e) {
   var albumId = $('#songModal').data('album-id');
